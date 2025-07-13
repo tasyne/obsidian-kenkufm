@@ -1,6 +1,7 @@
-# Obsidian MD Plugin to control Kenku FM from notes
+# Obsidian MD - Kenku FM Intergration
 This plugins give the ability to control Kenku FM from obsidian notes using the Remote API
 
+![example of track card](https://github.com/natowb/obsidian-kenkufm/blob/main/public/images/example.png?raw=true)
 
 ## Features
 - TBD
