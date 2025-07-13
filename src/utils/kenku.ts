@@ -93,12 +93,12 @@ export class KenkuController {
 	static async playTrack(id: string, restart = false) {
 		const { playing, track } = await this.getState();
 
-		if (id === track.id && playing) {
+		if (id === track?.id && playing) {
 			console.warn("doing nothing as we are already playing this track");
 			return;
 		}
 
-		if (id === track.id && !restart) {
+		if (id === track?.id && !restart) {
 			await this.resume();
 			return;
 		}
@@ -113,6 +113,7 @@ export class KenkuController {
 				id,
 			}),
 		};
+
 		await requestUrl(params);
 	}
 	static async playSound(id: string) {
