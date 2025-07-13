@@ -85,7 +85,7 @@ export default class KenkuFMRemotePlugin extends Plugin {
 		ctx: MarkdownPostProcessorContext,
 	) {
 		try {
-			let config: KenkuButtonParams = parseYaml(source);
+			const config: KenkuButtonParams = parseYaml(source);
 			el.addClass("kenkufm-button-container");
 			new KenkuButton({
 				target: el,

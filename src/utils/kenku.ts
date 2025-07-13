@@ -27,14 +27,14 @@ export class KenkuController {
 
 		try {
 			const { tracks, playlists } = await requestUrl(
-				`http://127.0.0.1:3333/v1/playlist`,
+				"http://127.0.0.1:3333/v1/playlist",
 			).json;
 			this.tracks = tracks;
 			this.playlists = playlists;
 			console.log(`[Kenku Controls] ${this.tracks.length} Tracks Loaded`);
 
 			const { sounds, soundboards } = await requestUrl(
-				`http://127.0.0.1:3333/v1/soundboard`,
+				"http://127.0.0.1:3333/v1/soundboard",
 			).json;
 			this.sounds = sounds;
 			this.soundboards = soundboards;
@@ -63,7 +63,7 @@ export class KenkuController {
 
 	static async resume() {
 		try {
-			let params: RequestUrlParam = {
+			const params: RequestUrlParam = {
 				url: "http://127.0.0.1:3333/v1/playlist/playback/play",
 				method: "PUT",
 			};
@@ -76,7 +76,7 @@ export class KenkuController {
 
 	static async pause() {
 		try {
-			let params: RequestUrlParam = {
+			const params: RequestUrlParam = {
 				url: "http://127.0.0.1:3333/v1/playlist/playback/pause",
 				method: "PUT",
 			};
@@ -87,7 +87,7 @@ export class KenkuController {
 		}
 	}
 
-	static async playTrack(id: string, restart: boolean = false) {
+	static async playTrack(id: string, restart = false) {
 		const { playing, track } = await this.getState();
 
 		if (id === track.id && playing) {
@@ -100,7 +100,7 @@ export class KenkuController {
 			return;
 		}
 
-		let params: RequestUrlParam = {
+		const params: RequestUrlParam = {
 			url: "http://127.0.0.1:3333/v1/playlist/play",
 			method: "PUT",
 			headers: {
@@ -113,7 +113,7 @@ export class KenkuController {
 		await requestUrl(params);
 	}
 	static async playSound(id: string) {
-		let params: RequestUrlParam = {
+		const params: RequestUrlParam = {
 			url: "http://127.0.0.1:3333/v1/soundboard/play",
 			method: "PUT",
 			headers: {

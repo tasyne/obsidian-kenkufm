@@ -7,8 +7,8 @@ interface Track {
 }
 
 export enum KenkuModalType {
-	Sound,
-	Track,
+	Sound = 0,
+	Track = 1,
 }
 
 export class PlayTrackModal extends SuggestModal<Track> {
