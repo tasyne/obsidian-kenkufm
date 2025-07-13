@@ -1,16 +1,60 @@
 <script lang="ts">
+    import { onMount } from "svelte";
     import type { KenkuButtonParams } from "../main";
+    import { KenkuController, type KenkuItem } from "../utils/kenku";
+    import { title } from "process";
     export let config: KenkuButtonParams;
+    let isPlaying = false;
+    let error: string = "";
+    let track: KenkuItem | undefined;
 
-    
+    onMount(async () => {
+        track = KenkuController.getTrackById(config.id);
+        if (track === undefined) {
+            error = "Unable to find track with that id";
+            return;
+        }
 
+        try {
+            const state = await KenkuController.getState();
+            isPlaying = state.playing && state.track.id === track.id;
+        } catch (err) {
+            error = "Failed to get playback state";
+        }
+    });
+
+    function togglePlay() {
+        isPlaying = !isPlaying;
+        if (isPlaying) {
+            KenkuController.playTrack(config.id);
+        } else {
+            KenkuController.pause();
+        }
+    }
 </script>
 
-<div class="flex flex-row justify-center">
-    <p>{config.title}</p>
-    <button class="mr-2">Play</button>
-    <button class="ml-2">Pause</button>
-</div>
-  
+{#if error}
+    <div class="p-4 rounded-xl shadow text-red-600 bg-red-200">
+        {error}
+    </div>
+{:else}
+    <div
+        class="flex items-center gap-4 p-4 rounded-xl shadow"
+        style="background-color: var(--background-primary-alt);"
+    >
+        <div class="text-lg font-semibold">
+            {config.title ? config.title : track?.title}
+        </div>
 
-
+        <button
+            class="ml-auto px-4 py-2 rounded-xl transition"
+            on:click={togglePlay}
+        >
+            {#if isPlaying}
+                ⏸ Pause
+            {:else}
+                ▶ Play
+            {/if}
+        </button>
+    </div>
+{/if}
