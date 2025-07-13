@@ -1,18 +1,11 @@
-import { Plugin, parseYaml, type MarkdownPostProcessorContext } from "obsidian";
-import { ExampleView, VIEW_TYPE_EXAMPLE } from "./views/ExampleView";
+import { Plugin } from "obsidian";
 import { KenkuController } from "./utils/kenku";
 import "virtual:uno.css";
-import KenkuButton from "./components/KenkuButton.svelte";
-import { PlaySoundModal, PlayTrackModal } from "./modals";
+import { InsertTrackModal } from "./modals";
+import { registerCodeBlockProcessors } from "./processors";
 
 interface ObsidianNoteConnectionsSettings {
 	mySetting: string;
-}
-
-export interface KenkuButtonParams {
-	type: string;
-	id: string;
-	title?: string;
 }
 
 const DEFAULT_SETTINGS: ObsidianNoteConnectionsSettings = {
@@ -33,33 +26,21 @@ export default class KenkuFMRemotePlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 		await KenkuController.init();
+		registerCodeBlockProcessors(this);
+
+		this.addCommand({
+			id: "kenku-insert-track",
+			name: "Insert Track",
+			callback: () => {
+				new InsertTrackModal(this.app).open();
+			},
+		});
 
 		// this.registerView(VIEW_TYPE_EXAMPLE, (leaf) => new ExampleView(leaf));
 
 		// this.addRibbonIcon("dice", "Activate view", () => {
 		// 	this.activateView();
 		// });
-
-		this.registerMarkdownCodeBlockProcessor(
-			"kenkufm",
-			this.postprocessor.bind(this),
-		);
-
-		this.addCommand({
-			id: "kenku-play-track",
-			name: "Play Track",
-			callback: () => {
-				new PlayTrackModal(this.app).open();
-			},
-		});
-
-		this.addCommand({
-			id: "kenku-play-sound",
-			name: "Play Sound",
-			callback: () => {
-				new PlaySoundModal(this.app).open();
-			},
-		});
 	}
 
 	onunload() {
@@ -78,23 +59,4 @@ export default class KenkuFMRemotePlugin extends Plugin {
 	// 		this.app.workspace.getLeavesOfType(VIEW_TYPE_EXAMPLE)[0],
 	// 	);
 	// }
-
-	async postprocessor(
-		source: string,
-		el: HTMLElement,
-		ctx: MarkdownPostProcessorContext,
-	) {
-		try {
-			const config: KenkuButtonParams = parseYaml(source);
-			el.addClass("kenkufm-button-container");
-			new KenkuButton({
-				target: el,
-				props: {
-					config: config,
-				},
-			});
-		} catch (e) {
-			console.error(`Kenku FM button Error:\n${e}`);
-		}
-	}
 }

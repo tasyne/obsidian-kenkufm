@@ -1,12 +1,14 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import type { KenkuButtonParams } from "../main";
+    import { onMount, onDestroy } from "svelte";
+    import type { KenkuFmTrackYaml } from "../processors/trackProcessor";
     import { KenkuController, type KenkuItem } from "../utils/kenku";
-    import { title } from "process";
-    export let config: KenkuButtonParams;
+
+    export let config: KenkuFmTrackYaml;
+
     let isPlaying = false;
     let error: string = "";
     let track: KenkuItem | undefined;
+    let interval: number;
 
     onMount(async () => {
         track = KenkuController.getTrackById(config.id);
@@ -15,13 +17,25 @@
             return;
         }
 
+        // Initial check
+        await updatePlayingState();
+
+        // Start polling every second
+        interval = window.setInterval(updatePlayingState, 1000);
+    });
+
+    onDestroy(() => {
+        clearInterval(interval);
+    });
+
+    async function updatePlayingState() {
         try {
             const state = await KenkuController.getState();
-            isPlaying = state.playing && state.track.id === track.id;
+            isPlaying = state.playing && state.track.id === track?.id;
         } catch (err) {
             error = "Failed to get playback state";
         }
-    });
+    }
 
     function togglePlay() {
         isPlaying = !isPlaying;
@@ -43,7 +57,7 @@
         style="background-color: var(--background-primary-alt);"
     >
         <div class="text-lg font-semibold">
-            {config.title ? config.title : track?.title}
+            {config.label ? config.label : track?.title}
         </div>
 
         <button

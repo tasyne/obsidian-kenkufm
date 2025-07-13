@@ -11,7 +11,7 @@ export enum KenkuModalType {
 	Track = 1,
 }
 
-export class PlayTrackModal extends SuggestModal<Track> {
+export class InsertTrackModal extends SuggestModal<Track> {
 	tracks: Track[] = [];
 	type: KenkuModalType;
 
@@ -35,28 +35,10 @@ export class PlayTrackModal extends SuggestModal<Track> {
 
 	// Perform action on the selected suggestion.
 	onChooseSuggestion(track: Track, evt: MouseEvent | KeyboardEvent) {
-		new Notice(`Now Playing ${track.title}`);
-		KenkuController.playTrack(track.id);
-	}
-}
-
-export class PlaySoundModal extends SuggestModal<Track> {
-	// Returns all available suggestions.
-	getSuggestions(query: string): Track[] {
-		return KenkuController.sounds.filter((track) =>
-			track.title.toLowerCase().includes(query.toLowerCase()),
-		);
-	}
-
-	// Renders each suggestion item.
-	renderSuggestion(track: Track, el: HTMLElement) {
-		el.createEl("div", { text: track.title });
-		el.createEl("small", { text: track.id });
-	}
-
-	// Perform action on the selected suggestion.
-	onChooseSuggestion(track: Track, evt: MouseEvent | KeyboardEvent) {
-		new Notice(`Now Playing ${track.title}`);
-		KenkuController.playSound(track.id);
+		const editor = app.workspace.activeEditor?.editor;
+		if (editor) {
+			const codeBlock = `\`\`\`kenkufm-track\n   id: ${track.id}\n\`\`\``;
+			editor.replaceRange(codeBlock, editor.getCursor());
+		}
 	}
 }
