@@ -4,6 +4,7 @@ import {
 	type RequestUrlParam,
 	type RequestUrlResponse,
 } from "obsidian";
+import { playback } from "../stores/playback";
 
 export interface KenkuItem {
 	title: string;
@@ -39,6 +40,8 @@ export class KenkuController {
 			this.sounds = sounds;
 			this.soundboards = soundboards;
 			console.log(`[Kenku Controls] ${this.sounds.length} Sounds Loaded`);
+
+			playback.startPolling();
 		} catch (e) {
 			console.log(e);
 			new Notice("Failed to load Kenku FM data\nis Kenku Remote running?");

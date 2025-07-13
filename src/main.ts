@@ -3,6 +3,7 @@ import { KenkuController } from "./utils/kenku";
 import "virtual:uno.css";
 import { InsertTrackModal } from "./modals";
 import { registerCodeBlockProcessors } from "./processors";
+import { playback } from "./stores/playback";
 
 interface ObsidianNoteConnectionsSettings {
 	mySetting: string;
@@ -45,6 +46,7 @@ export default class KenkuFMRemotePlugin extends Plugin {
 
 	onunload() {
 		console.log("unloading plugin");
+		playback.stopPolling();
 	}
 
 	// async activateView() {

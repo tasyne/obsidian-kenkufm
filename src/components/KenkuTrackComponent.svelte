@@ -1,48 +1,34 @@
 <script lang="ts">
-    import { onMount, onDestroy } from "svelte";
-    import type { KenkuFmTrackYaml } from "../processors/trackProcessor";
+    import { onMount } from "svelte";
+    import { playback } from "../stores/playback";
     import { KenkuController, type KenkuItem } from "../utils/kenku";
+    import type { KenkuFmTrackYaml } from "../processors/trackProcessor";
+    import { derived } from "svelte/store";
 
     export let config: KenkuFmTrackYaml;
 
-    let isPlaying = false;
-    let error: string = "";
     let track: KenkuItem | undefined;
-    let interval: number;
-
-    onMount(async () => {
+    let error: string = "";
+    onMount(() => {
         track = KenkuController.getTrackById(config.id);
-        if (track === undefined) {
+        if (!track) {
             error = "Unable to find track with that id";
-            return;
         }
-
-        // Initial check
-        await updatePlayingState();
-
-        // Start polling every second
-        interval = window.setInterval(updatePlayingState, 1000);
     });
-
-    onDestroy(() => {
-        clearInterval(interval);
+    // This will be reactive and track if the current playing track is this one
+    const isPlaying = derived(playback, ($playback) => {
+        return (
+            $playback.state?.playing && $playback.state.track?.id === track?.id
+        );
     });
-
-    async function updatePlayingState() {
-        try {
-            const state = await KenkuController.getState();
-            isPlaying = state.playing && state.track.id === track?.id;
-        } catch (err) {
-            error = "Failed to get playback state";
-        }
-    }
 
     function togglePlay() {
-        isPlaying = !isPlaying;
-        if (isPlaying) {
-            KenkuController.playTrack(config.id);
-        } else {
-            KenkuController.pause();
+        if (track) {
+            if ($isPlaying) {
+                KenkuController.pause();
+            } else {
+                KenkuController.playTrack(config.id);
+            }
         }
     }
 </script>
@@ -64,7 +50,7 @@
             class="ml-auto px-4 py-2 rounded-xl transition"
             on:click={togglePlay}
         >
-            {#if isPlaying}
+            {#if $isPlaying}
                 ⏸ Pause
             {:else}
                 ▶ Play
