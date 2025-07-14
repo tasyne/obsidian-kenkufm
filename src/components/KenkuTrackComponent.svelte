@@ -1,34 +1,41 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { playback } from "../stores/playback";
-    import { KenkuController, type KenkuItem } from "../utils/kenku";
     import type { KenkuFmTrackYaml } from "../processors/trackProcessor";
     import { derived } from "svelte/store";
+    import type { KenkuItem } from "../types";
+    import {
+        getTrackById,
+        pausePlayback,
+        playTrack,
+        seekTrack,
+    } from "../utils/kenku";
+    import { currentState } from "../stores/kenkuStore";
 
     export let config: KenkuFmTrackYaml;
 
     let track: KenkuItem | undefined;
     let error: string = "";
     onMount(() => {
-        track = KenkuController.getTrackById(config.id);
+        track = getTrackById(config.id);
         if (!track) {
             error = "Unable to find track with that id";
         }
     });
-    // This will be reactive and track if the current playing track is this one
-    const isPlaying = derived(playback, ($playback) => {
-        return (
-            $playback.state?.playing && $playback.state.track?.id === track?.id
-        );
+
+    const isPlaying = derived(currentState, ($state) => {
+        return $state?.playing && $state.track?.id === track?.id;
     });
 
-    const progressInfo = derived(playback, ($playback) => {
-        const current = $playback.state;
-        const isThisTrack = current?.track?.id === track?.id;
+    const progressInfo = derived(currentState, ($state) => {
+        if (!$state) {
+            return { progress: 0, duration: 1 };
+        }
+
+        const isThisTrack = $state.track?.id === track?.id;
         return isThisTrack
             ? {
-                  progress: current?.track.progress ?? 0,
-                  duration: current?.track?.duration ?? 1,
+                  progress: $state.track?.progress ?? 0,
+                  duration: $state.track?.duration ?? 1,
               }
             : { progress: 0, duration: 1 };
     });
@@ -36,9 +43,9 @@
     function togglePlay() {
         if (track) {
             if ($isPlaying) {
-                KenkuController.pause();
+                pausePlayback();
             } else {
-                KenkuController.playTrack(config.id);
+                playTrack(track.id);
             }
         }
     }
@@ -83,10 +90,11 @@
                 {/if}
             </button>
         </div>
-        <div class="slider-container mt-2 rounded">
-            <div class="slider-track"></div>
+
+        <div class="track-progress-container mt-2 rounded">
+            <div class="track-progress-background"></div>
             <div
-                class="slider-fill"
+                class="track-progress-fill"
                 style="width: {($progressInfo.progress /
                     $progressInfo.duration) *
                     100}%"
@@ -97,18 +105,15 @@
                 max={$progressInfo.duration}
                 step="0.1"
                 value={$progressInfo.progress}
-                class="slider-input"
+                class="track-progress-input"
                 on:change={(e) => {
                     if (track) {
-                        KenkuController.seekTrack(
-                            track.id,
-                            parseFloat(e.currentTarget.value),
-                        );
+                        seekTrack(track.id, parseFloat(e.currentTarget.value));
                     }
                 }}
             />
         </div>
-        <div class="flex justify-between text-xs text-gray-500 mt-2">
+        <div class="track-progress-time flex justify-between text-xs mt-2">
             <span>{formatTime($progressInfo.progress)}</span>
             <span>{formatTime($progressInfo.duration)}</span>
         </div>
@@ -116,12 +121,12 @@
 {/if}
 
 <style>
-    .slider-container {
+    .track-progress-container {
         position: relative;
         height: 0.5rem;
     }
 
-    .slider-track {
+    .track-progress-background {
         position: absolute;
         top: 0;
         left: 0;
@@ -132,7 +137,7 @@
         pointer-events: none;
     }
 
-    .slider-fill {
+    .track-progress-fill {
         position: absolute;
         top: 0;
         left: 0;
@@ -142,7 +147,7 @@
         pointer-events: none;
     }
 
-    .slider-input {
+    .track-progress-input {
         position: absolute;
         top: 0;
         left: 0;
@@ -151,5 +156,8 @@
         opacity: 0;
         cursor: pointer;
         z-index: 10;
+    }
+    .track-progress-time {
+        color: var(--text-muted);
     }
 </style>

@@ -1,9 +1,12 @@
 import { Plugin } from "obsidian";
-import { KenkuController } from "./utils/kenku";
 import "virtual:uno.css";
 import { InsertTrackModal } from "./modals";
 import { registerCodeBlockProcessors } from "./processors";
-import { playback } from "./stores/playback";
+import {
+	initKenkuData,
+	startPollingKenkuState,
+	stopPollingKenkuState,
+} from "./utils/kenku";
 
 interface ObsidianNoteConnectionsSettings {
 	mySetting: string;
@@ -26,7 +29,8 @@ export default class KenkuFMRemotePlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		await KenkuController.init();
+		await initKenkuData();
+		startPollingKenkuState();
 		registerCodeBlockProcessors(this);
 
 		this.addCommand({
@@ -45,8 +49,7 @@ export default class KenkuFMRemotePlugin extends Plugin {
 	}
 
 	onunload() {
-		console.log("unloading plugin");
-		playback.stopPolling();
+		stopPollingKenkuState();
 	}
 
 	// async activateView() {
