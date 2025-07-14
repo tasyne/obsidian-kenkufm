@@ -1,9 +1,10 @@
-import { type MarkdownPostProcessorContext, parseYaml } from "obsidian";
+import { type MarkdownPostProcessorContext, Notice, parseYaml } from "obsidian";
 import KenkuTrackComponent from "../components/KenkuTrackComponent.svelte";
 
 export interface KenkuFmTrackYaml {
 	id: string;
 	label?: string;
+	showProgress?: boolean;
 }
 
 export const trackProcessor = async (
@@ -20,6 +21,6 @@ export const trackProcessor = async (
 			},
 		});
 	} catch (e) {
-		console.error(`Kenku FM button Error:\n${e}`);
+		new Notice("Failed to parse yaml and create kenku track component");
 	}
 };

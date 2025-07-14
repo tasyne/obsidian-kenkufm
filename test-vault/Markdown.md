@@ -3,6 +3,7 @@
 
 ```kenkufm-track
    id: f664fc30-5392-47ce-ab67-d6f50fdc9b57
+   showProgress: true
 ```
 
 

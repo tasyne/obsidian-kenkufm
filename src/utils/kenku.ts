@@ -1,164 +1,149 @@
+// src/utils/kenku.ts
+import { Notice, requestUrl } from "obsidian";
 import {
-	Notice,
-	requestUrl,
-	type RequestUrlParam,
-	type RequestUrlResponse,
-} from "obsidian";
-import { playback } from "../stores/playback";
+	tracks,
+	playlists,
+	sounds,
+	soundboards,
+	currentState,
+} from "../stores/kenkuStore";
+import type { KenkuItem, KenkuFMState } from "../types";
 
-export interface KenkuItem {
-	title: string;
-	id: string;
+export async function initKenkuData() {
+	console.log("[Kenku] Loading Kenku FM Tracks...");
+
+	try {
+		const { tracks: t, playlists: p } = await requestUrl(
+			"http://127.0.0.1:3333/v1/playlist",
+		).json;
+		tracks.set(t);
+		playlists.set(p);
+		console.log(`[Kenku] Loaded ${t.length} tracks`);
+
+		const { sounds: s, soundboards: sb } = await requestUrl(
+			"http://127.0.0.1:3333/v1/soundboard",
+		).json;
+		sounds.set(s);
+		soundboards.set(sb);
+		console.log(`[Kenku] Loaded ${s.length} sounds`);
+	} catch (e) {
+		new Notice("Failed to load Kenku FM data\nIs Kenku Remote running?");
+	}
 }
 
-export interface KenkuTrack extends KenkuItem {
-	duration: number;
-	progress: number;
+export async function getKenkuState(): Promise<KenkuFMState> {
+	try {
+		const state = await requestUrl("http://127.0.0.1:3333/v1/playlist/playback")
+			.json;
+		currentState.set(state);
+		return state as KenkuFMState;
+	} catch (e) {
+		new Notice("Failed to get playback state");
+		throw e;
+	}
 }
 
-export interface KenkuFMState {
-	playing: boolean;
-	track: KenkuTrack;
-	playlist: KenkuItem;
+export async function resumePlayback() {
+	try {
+		await requestUrl({
+			url: "http://127.0.0.1:3333/v1/playlist/playback/play",
+			method: "PUT",
+		});
+	} catch (e) {
+		new Notice("Failed to resume playback");
+		throw e;
+	}
 }
 
-export class KenkuController {
-	static tracks: KenkuItem[] = [];
-	static sounds: KenkuItem[] = [];
-	static playlists: KenkuItem[] = [];
-	static soundboards: KenkuItem[] = [];
-
-	static async init() {
-		console.log("Loading Kenku FM Tracks...");
-
-		try {
-			const { tracks, playlists } = await requestUrl(
-				"http://127.0.0.1:3333/v1/playlist",
-			).json;
-			this.tracks = tracks;
-			this.playlists = playlists;
-			console.log(`[Kenku Controls] ${this.tracks.length} Tracks Loaded`);
-
-			const { sounds, soundboards } = await requestUrl(
-				"http://127.0.0.1:3333/v1/soundboard",
-			).json;
-			this.sounds = sounds;
-			this.soundboards = soundboards;
-			console.log(`[Kenku Controls] ${this.sounds.length} Sounds Loaded`);
-
-			playback.startPolling();
-		} catch (e) {
-			console.log(e);
-			new Notice("Failed to load Kenku FM data\nis Kenku Remote running?");
-		}
-	}
-
-	static getTrackById(id: string): KenkuItem | undefined {
-		return this.tracks.find((track) => track.id === id);
-	}
-
-	static async getState(): Promise<KenkuFMState> {
-		try {
-			const response = await requestUrl(
-				"http://127.0.0.1:3333/v1/playlist/playback",
-			).json;
-			return response as KenkuFMState;
-		} catch (e) {
-			new Notice("Failed to load Kenku FM data\nis Kenku Remote running?");
-			throw e;
-		}
-	}
-
-	static async resume() {
-		try {
-			const params: RequestUrlParam = {
-				url: "http://127.0.0.1:3333/v1/playlist/playback/play",
-				method: "PUT",
-			};
-			const response = await requestUrl(params);
-		} catch (e) {
-			new Notice("Failed to load Kenku FM data\nis Kenku Remote running?");
-			throw e;
-		}
-	}
-
-	static async pause() {
-		try {
-			const params: RequestUrlParam = {
-				url: "http://127.0.0.1:3333/v1/playlist/playback/pause",
-				method: "PUT",
-			};
-			const response = await requestUrl(params);
-		} catch (e) {
-			new Notice("Failed to load Kenku FM data\nis Kenku Remote running?");
-			throw e;
-		}
-	}
-
-	static async playTrack(id: string, restart = false) {
-		const { playing, track } = await this.getState();
-
-		if (id === track?.id && playing) {
-			console.warn("doing nothing as we are already playing this track");
-			return;
-		}
-
-		if (id === track?.id && !restart) {
-			await this.resume();
-			return;
-		}
-
-		const params: RequestUrlParam = {
-			url: "http://127.0.0.1:3333/v1/playlist/play",
+export async function pausePlayback() {
+	try {
+		await requestUrl({
+			url: "http://127.0.0.1:3333/v1/playlist/playback/pause",
 			method: "PUT",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				id,
-			}),
-		};
+		});
+	} catch (e) {
+		new Notice("Failed to pause playback");
+		throw e;
+	}
+}
 
-		await requestUrl(params);
+export async function playTrack(id: string, restart = false) {
+	const { playing, track } = await getKenkuState();
+
+	if (id === track?.id && playing) {
+		return;
 	}
 
-	static async seekTrack(id: string, to: number) {
-		const { playing, track } = await this.getState();
-
-		if (id !== track?.id) {
-			console.warn("doing nothing as we are not playing this track");
-			return;
-		}
-		to = Math.floor(to);
-		if (to > track.duration) {
-			to = track.duration;
-		}
-
-		const params: RequestUrlParam = {
-			url: "http://127.0.0.1:3333/v1/playlist/playback/seek",
-			method: "PUT",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				to,
-			}),
-		};
-
-		await requestUrl(params);
+	if (id === track?.id && !restart) {
+		await resumePlayback();
+		return;
 	}
 
-	static async playSound(id: string) {
-		const params: RequestUrlParam = {
-			url: "http://127.0.0.1:3333/v1/soundboard/play",
-			method: "PUT",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				id,
-			}),
-		};
-		await requestUrl(params);
+	await requestUrl({
+		url: "http://127.0.0.1:3333/v1/playlist/play",
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ id }),
+	});
+}
+
+export async function seekTrack(id: string, to: number) {
+	const { track } = await getKenkuState();
+
+	if (id !== track?.id) {
+		return;
+	}
+
+	const flooredTo = Math.min(Math.floor(to), track.duration);
+
+	await requestUrl({
+		url: "http://127.0.0.1:3333/v1/playlist/playback/seek",
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ to: flooredTo }),
+	});
+}
+
+export async function playSound(id: string) {
+	await requestUrl({
+		url: "http://127.0.0.1:3333/v1/soundboard/play",
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ id }),
+	});
+}
+
+export function getTrackById(id: string): KenkuItem | undefined {
+	let result: KenkuItem | undefined;
+	tracks.update((t) => {
+		result = t.find((track) => track.id === id);
+		return t;
+	});
+	return result;
+}
+
+let intervalId: NodeJS.Timeout | undefined;
+
+async function refresh() {
+	try {
+		const state = await requestUrl("http://127.0.0.1:3333/v1/playlist/playback")
+			.json;
+		currentState.set(state);
+	} catch (e) {
+		new Notice("Failed to get playback state");
+		throw e;
+	}
+}
+
+export function startPollingKenkuState(interval = 1000) {
+	if (intervalId !== undefined) return;
+	refresh();
+	intervalId = setInterval(refresh, interval);
+}
+
+export function stopPollingKenkuState() {
+	if (intervalId !== undefined) {
+		clearInterval(intervalId);
+		intervalId = undefined;
 	}
 }

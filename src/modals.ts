@@ -1,5 +1,6 @@
 import { App, Notice, SuggestModal } from "obsidian";
-import { KenkuController } from "./utils/kenku";
+import { tracks } from "./stores/kenkuStore";
+import { get } from "svelte/store";
 
 interface Track {
 	title: string;
@@ -22,7 +23,7 @@ export class InsertTrackModal extends SuggestModal<Track> {
 
 	// Returns all available suggestions.
 	getSuggestions(query: string): Track[] {
-		return KenkuController.tracks.filter((track) =>
+		return get(tracks).filter((track) =>
 			track.title.toLowerCase().includes(query.toLowerCase()),
 		);
 	}
