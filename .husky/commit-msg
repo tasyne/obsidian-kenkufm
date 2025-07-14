@@ -1,0 +1,4 @@
+BUN_INSTALL="$HOME/.bun"
+PATH="$BUN_INSTALL/bin:$PATH"
+
+bunx --no-install commitlint --edit
