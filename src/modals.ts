@@ -1,4 +1,4 @@
-import { App, Notice, SuggestModal } from "obsidian";
+import { type App, SuggestModal } from "obsidian";
 import { tracks } from "./stores/kenkuStore";
 import { get } from "svelte/store";
 
@@ -36,7 +36,7 @@ export class InsertTrackModal extends SuggestModal<Track> {
 
 	// Perform action on the selected suggestion.
 	onChooseSuggestion(track: Track, evt: MouseEvent | KeyboardEvent) {
-		const editor = app.workspace.activeEditor?.editor;
+		const editor = this.app.workspace.activeEditor?.editor;
 		if (editor) {
 			const codeBlock = `\`\`\`kenkufm-track\n   id: ${track.id}\n\`\`\``;
 			editor.replaceRange(codeBlock, editor.getCursor());

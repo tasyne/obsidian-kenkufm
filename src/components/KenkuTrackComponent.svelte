@@ -10,6 +10,8 @@
         seekTrack,
     } from "../utils/kenku";
     import { currentState } from "../stores/kenkuStore";
+    import { Disc3, Pause, Play } from "lucide-svelte";
+    import ProgressBar from "./ProgressBar.svelte";
 
     export let config: KenkuFmTrackYaml;
 
@@ -62,109 +64,54 @@
             ? `${pad(hrs)}:${pad(mins)}:${pad(secs)}`
             : `${pad(mins)}:${pad(secs)}`;
     }
+
+    $: trackTitle = config.label ? config.label : track?.title;
 </script>
 
 {#if error}
-    <div class="p-4 rounded-xl shadow text-red-600 bg-red-200">
+    <div
+        class="p-4 rounded-xl shadow"
+        style="background-color: rgba(var(--callout-error), 0.1);"
+    >
         {error}
     </div>
 {:else}
     <div
-        class="gap-4 p-4 rounded-xl shadow"
+        class="flex flex-col gap-2 p-4 rounded-xl shadow"
         style="background-color: var(--background-primary-alt);"
     >
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 track-header pb-4">
+            <Disc3 />
             <div
-                class="text-lg font-semibold"
+                class="text-sm font-semibold"
                 style="color: var(--text-normal);"
             >
-                {config.label ? config.label : track?.title}
+                {trackTitle}
             </div>
-
             <button
-                class="ml-auto px-4 py-2 rounded-xl transition"
+                class="ml-auto rounded-xl transition mod-cta"
                 on:click={togglePlay}
             >
                 {#if $isPlaying}
-                    ⏸ Pause
+                    <Pause />
                 {:else}
-                    ▶ Play
+                    <Play />
                 {/if}
             </button>
         </div>
 
         {#if showProgress}
-            <div class="track-progress-container mt-2 rounded">
-                <div class="track-progress-background"></div>
-                <div
-                    class="track-progress-fill"
-                    style="width: {($progressInfo.progress /
-                        $progressInfo.duration) *
-                        100}%"
-                ></div>
-                <input
-                    type="range"
-                    min="0"
-                    max={$progressInfo.duration}
-                    step="0.1"
-                    value={$progressInfo.progress}
-                    class="track-progress-input"
-                    on:change={(e) => {
-                        if (track) {
-                            seekTrack(
-                                track.id,
-                                parseFloat(e.currentTarget.value),
-                            );
-                        }
-                    }}
-                />
-            </div>
-            <div class="track-progress-time flex justify-between text-xs mt-2">
-                <span>{formatTime($progressInfo.progress)}</span>
-                <span>{formatTime($progressInfo.duration)}</span>
-            </div>
+            <ProgressBar
+                bind:value={$progressInfo.progress}
+                max={$progressInfo.duration}
+                onChange={(value) => track && seekTrack(track.id, value)}
+            />
         {/if}
     </div>
 {/if}
 
 <style>
-    .track-progress-container {
-        position: relative;
-        height: 0.5rem;
-    }
-
-    .track-progress-background {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        border-radius: 9999px;
-        background-color: var(--background-primary);
-        width: 100%;
-        pointer-events: none;
-    }
-
-    .track-progress-fill {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        border-radius: 9999px;
-        background-color: var(--color-accent);
-        pointer-events: none;
-    }
-
-    .track-progress-input {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-        z-index: 10;
-    }
-    .track-progress-time {
-        color: var(--text-muted);
+    .track-header {
+        border-bottom: solid 1px var(--background-modifier-border);
     }
 </style>
