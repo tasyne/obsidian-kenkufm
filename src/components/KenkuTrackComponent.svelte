@@ -15,8 +15,10 @@
 
     let track: KenkuItem | undefined;
     let error: string = "";
+    let showProgress: boolean = false;
     onMount(() => {
         track = getTrackById(config.id);
+        showProgress = !!config.showProgress;
         if (!track) {
             error = "Unable to find track with that id";
         }
@@ -91,32 +93,37 @@
             </button>
         </div>
 
-        <div class="track-progress-container mt-2 rounded">
-            <div class="track-progress-background"></div>
-            <div
-                class="track-progress-fill"
-                style="width: {($progressInfo.progress /
-                    $progressInfo.duration) *
-                    100}%"
-            ></div>
-            <input
-                type="range"
-                min="0"
-                max={$progressInfo.duration}
-                step="0.1"
-                value={$progressInfo.progress}
-                class="track-progress-input"
-                on:change={(e) => {
-                    if (track) {
-                        seekTrack(track.id, parseFloat(e.currentTarget.value));
-                    }
-                }}
-            />
-        </div>
-        <div class="track-progress-time flex justify-between text-xs mt-2">
-            <span>{formatTime($progressInfo.progress)}</span>
-            <span>{formatTime($progressInfo.duration)}</span>
-        </div>
+        {#if showProgress}
+            <div class="track-progress-container mt-2 rounded">
+                <div class="track-progress-background"></div>
+                <div
+                    class="track-progress-fill"
+                    style="width: {($progressInfo.progress /
+                        $progressInfo.duration) *
+                        100}%"
+                ></div>
+                <input
+                    type="range"
+                    min="0"
+                    max={$progressInfo.duration}
+                    step="0.1"
+                    value={$progressInfo.progress}
+                    class="track-progress-input"
+                    on:change={(e) => {
+                        if (track) {
+                            seekTrack(
+                                track.id,
+                                parseFloat(e.currentTarget.value),
+                            );
+                        }
+                    }}
+                />
+            </div>
+            <div class="track-progress-time flex justify-between text-xs mt-2">
+                <span>{formatTime($progressInfo.progress)}</span>
+                <span>{formatTime($progressInfo.duration)}</span>
+            </div>
+        {/if}
     </div>
 {/if}
 
