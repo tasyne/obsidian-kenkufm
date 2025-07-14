@@ -80,7 +80,7 @@
         class="flex flex-col gap-2 p-4 rounded-xl shadow"
         style="background-color: var(--background-primary-alt);"
     >
-        <div class="flex items-center gap-2 track-header pb-4">
+        <div class="flex items-center gap-2">
             <Disc3 />
             <div
                 class="text-sm font-semibold"
@@ -109,9 +109,3 @@
         {/if}
     </div>
 {/if}
-
-<style>
-    .track-header {
-        border-bottom: solid 1px var(--background-modifier-border);
-    }
-</style>

@@ -39,7 +39,7 @@
     $: sliderStyle = `background: linear-gradient(to right, var(--color-accent) 0%, var(--color-accent) ${percent}%, var(--background-primary) ${percent}%, var(--background-primary) 100%)`;
 </script>
 
-<div class="flex flex-col gap-2">
+<div class="flex flex-col gap-2 progress-container">
     <div class="flex justify-between text-xs mt-2">
         <span>{formatTime(internalValue)}</span>
         <span>{formatTime(max)}</span>
@@ -59,6 +59,9 @@
 </div>
 
 <style>
+    .progress-container {
+        border-top: solid 1px var(--background-modifier-border);
+    }
     .progress-bar-slider {
         width: 100%;
         height: 8px;
