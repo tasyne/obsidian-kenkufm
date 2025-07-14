@@ -94,77 +94,17 @@
         </div>
 
         {#if showProgress}
-            <div class="track-progress-container mt-2 rounded">
-                <div class="track-progress-background"></div>
-                <div
-                    class="track-progress-fill"
-                    style="width: {($progressInfo.progress /
-                        $progressInfo.duration) *
-                        100}%"
-                ></div>
-                <input
-                    type="range"
-                    min="0"
-                    max={$progressInfo.duration}
-                    step="0.1"
-                    value={$progressInfo.progress}
-                    class="track-progress-input"
-                    on:change={(e) => {
-                        if (track) {
-                            seekTrack(
-                                track.id,
-                                parseFloat(e.currentTarget.value),
-                            );
-                        }
-                    }}
-                />
-            </div>
-            <div class="track-progress-time flex justify-between text-xs mt-2">
-                <span>{formatTime($progressInfo.progress)}</span>
-                <span>{formatTime($progressInfo.duration)}</span>
-            </div>
+            <ProgressBar
+                bind:value={$progressInfo.progress}
+                max={$progressInfo.duration}
+                onChange={(value) => track && seekTrack(track.id, value)}
+            />
         {/if}
     </div>
 {/if}
 
 <style>
-    .track-progress-container {
-        position: relative;
-        height: 0.5rem;
-    }
-
-    .track-progress-background {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        border-radius: 9999px;
-        background-color: var(--background-primary);
-        width: 100%;
-        pointer-events: none;
-    }
-
-    .track-progress-fill {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        border-radius: 9999px;
-        background-color: var(--color-accent);
-        pointer-events: none;
-    }
-
-    .track-progress-input {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-        z-index: 10;
-    }
-    .track-progress-time {
-        color: var(--text-muted);
+    .track-header {
+        border-bottom: solid 1px var(--background-modifier-border);
     }
 </style>
