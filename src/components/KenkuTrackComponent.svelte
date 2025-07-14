@@ -22,6 +22,17 @@
         );
     });
 
+    const progressInfo = derived(playback, ($playback) => {
+        const current = $playback.state;
+        const isThisTrack = current?.track?.id === track?.id;
+        return isThisTrack
+            ? {
+                  progress: current?.track.progress ?? 0,
+                  duration: current?.track?.duration ?? 1,
+              }
+            : { progress: 0, duration: 1 };
+    });
+
     function togglePlay() {
         if (track) {
             if ($isPlaying) {
@@ -31,6 +42,17 @@
             }
         }
     }
+
+    function formatTime(seconds: number): string {
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
+
+        const pad = (n: number) => n.toString().padStart(2, "0");
+        return hrs > 0
+            ? `${pad(hrs)}:${pad(mins)}:${pad(secs)}`
+            : `${pad(mins)}:${pad(secs)}`;
+    }
 </script>
 
 {#if error}
@@ -39,22 +61,95 @@
     </div>
 {:else}
     <div
-        class="flex items-center gap-4 p-4 rounded-xl shadow"
+        class="gap-4 p-4 rounded-xl shadow"
         style="background-color: var(--background-primary-alt);"
     >
-        <div class="text-lg font-semibold">
-            {config.label ? config.label : track?.title}
-        </div>
+        <div class="flex items-center gap-4">
+            <div
+                class="text-lg font-semibold"
+                style="color: var(--text-normal);"
+            >
+                {config.label ? config.label : track?.title}
+            </div>
 
-        <button
-            class="ml-auto px-4 py-2 rounded-xl transition"
-            on:click={togglePlay}
-        >
-            {#if $isPlaying}
-                ⏸ Pause
-            {:else}
-                ▶ Play
-            {/if}
-        </button>
+            <button
+                class="ml-auto px-4 py-2 rounded-xl transition"
+                on:click={togglePlay}
+            >
+                {#if $isPlaying}
+                    ⏸ Pause
+                {:else}
+                    ▶ Play
+                {/if}
+            </button>
+        </div>
+        <div class="slider-container mt-2 rounded">
+            <div class="slider-track"></div>
+            <div
+                class="slider-fill"
+                style="width: {($progressInfo.progress /
+                    $progressInfo.duration) *
+                    100}%"
+            ></div>
+            <input
+                type="range"
+                min="0"
+                max={$progressInfo.duration}
+                step="0.1"
+                value={$progressInfo.progress}
+                class="slider-input"
+                on:change={(e) => {
+                    if (track) {
+                        KenkuController.seekTrack(
+                            track.id,
+                            parseFloat(e.currentTarget.value),
+                        );
+                    }
+                }}
+            />
+        </div>
+        <div class="flex justify-between text-xs text-gray-500 mt-2">
+            <span>{formatTime($progressInfo.progress)}</span>
+            <span>{formatTime($progressInfo.duration)}</span>
+        </div>
     </div>
 {/if}
+
+<style>
+    .slider-container {
+        position: relative;
+        height: 0.5rem;
+    }
+
+    .slider-track {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        border-radius: 9999px;
+        background-color: var(--background-primary);
+        width: 100%;
+        pointer-events: none;
+    }
+
+    .slider-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        border-radius: 9999px;
+        background-color: var(--color-accent);
+        pointer-events: none;
+    }
+
+    .slider-input {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 10;
+    }
+</style>

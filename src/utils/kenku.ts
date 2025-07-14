@@ -11,9 +11,14 @@ export interface KenkuItem {
 	id: string;
 }
 
+export interface KenkuTrack extends KenkuItem {
+	duration: number;
+	progress: number;
+}
+
 export interface KenkuFMState {
 	playing: boolean;
-	track: KenkuItem;
+	track: KenkuTrack;
 	playlist: KenkuItem;
 }
 
@@ -116,6 +121,33 @@ export class KenkuController {
 
 		await requestUrl(params);
 	}
+
+	static async seekTrack(id: string, to: number) {
+		const { playing, track } = await this.getState();
+
+		if (id !== track?.id) {
+			console.warn("doing nothing as we are not playing this track");
+			return;
+		}
+		to = Math.floor(to);
+		if (to > track.duration) {
+			to = track.duration;
+		}
+
+		const params: RequestUrlParam = {
+			url: "http://127.0.0.1:3333/v1/playlist/playback/seek",
+			method: "PUT",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				to,
+			}),
+		};
+
+		await requestUrl(params);
+	}
+
 	static async playSound(id: string) {
 		const params: RequestUrlParam = {
 			url: "http://127.0.0.1:3333/v1/soundboard/play",
