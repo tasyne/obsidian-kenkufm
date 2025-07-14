@@ -4,7 +4,7 @@
 	"description": "A obsidian plugin that allows controlling Kenku FM from within Obsidian",
 	"author": "natowb",
 	"authorUrl": "https://github.com/natowb",
-	"version": "v0.0.3-alpha",
+	"version": "v0.0.4-alpha",
 	"minAppVersion": "0.15.0",
 	"isDesktopOnly": false
 }
