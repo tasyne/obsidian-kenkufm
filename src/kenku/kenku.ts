@@ -121,29 +121,3 @@ export function getTrackById(id: string): KenkuItem | undefined {
 	});
 	return result;
 }
-
-let intervalId: NodeJS.Timeout | undefined;
-
-async function refresh() {
-	try {
-		const state = await requestUrl("http://127.0.0.1:3333/v1/playlist/playback")
-			.json;
-		currentState.set(state);
-	} catch (e) {
-		new Notice("Failed to get playback state");
-		throw e;
-	}
-}
-
-export function startPollingKenkuState(interval = 1000) {
-	if (intervalId !== undefined) return;
-	refresh();
-	intervalId = setInterval(refresh, interval);
-}
-
-export function stopPollingKenkuState() {
-	if (intervalId !== undefined) {
-		clearInterval(intervalId);
-		intervalId = undefined;
-	}
-}

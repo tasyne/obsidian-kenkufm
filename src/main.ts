@@ -2,11 +2,8 @@ import { Plugin } from "obsidian";
 import "virtual:uno.css";
 import { InsertTrackModal } from "./modals";
 import { registerCodeBlockProcessors } from "./processors";
-import {
-	initKenkuData,
-	startPollingKenkuState,
-	stopPollingKenkuState,
-} from "./utils/kenku";
+import * as kenkuConnector from "./kenku/kenkuConnector";
+import { isKenkuConnected } from "./stores/kenkuStore";
 
 interface ObsidianNoteConnectionsSettings {
 	mySetting: string;
@@ -29,10 +26,7 @@ export default class KenkuFMRemotePlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		await initKenkuData();
-		startPollingKenkuState();
 		registerCodeBlockProcessors(this);
-
 		this.addCommand({
 			id: "kenku-insert-track",
 			name: "Insert Track",
@@ -40,6 +34,8 @@ export default class KenkuFMRemotePlugin extends Plugin {
 				new InsertTrackModal(this.app).open();
 			},
 		});
+
+		await kenkuConnector.connect();
 
 		// this.registerView(VIEW_TYPE_EXAMPLE, (leaf) => new ExampleView(leaf));
 
@@ -49,7 +45,8 @@ export default class KenkuFMRemotePlugin extends Plugin {
 	}
 
 	onunload() {
-		stopPollingKenkuState();
+		kenkuConnector.stopPolling();
+		isKenkuConnected.set(false);
 	}
 
 	// async activateView() {
