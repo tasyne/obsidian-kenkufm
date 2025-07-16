@@ -1,4 +1,3 @@
-import { ArrowRightSquare } from "lucide-svelte";
 import * as kenkuApi from "../api/kenkuApi";
 import {
 	currentState,

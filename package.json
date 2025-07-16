@@ -7,9 +7,11 @@
   "scripts": {
     "dev": "vite build --mode development --watch",
     "build": "vite build --mode production",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "svelte:check": "svelte-check --tsconfig ./tsconfig.json",
+    "biome:check": "biome check ./src",
     "format": "biome format --write ./src",
     "lint": "biome lint --apply-unsafe ./src",
+    "lint:ci": "biome lint ./src",
     "prepare": "husky"
   },
   "devDependencies": {
