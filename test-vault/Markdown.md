@@ -1,18 +1,23 @@
-
-## Encounter: 1
+## Scene 1 - Tavern
 
 ```kenkufm-track
    id: f664fc30-5392-47ce-ab67-d6f50fdc9b57
+   label: Tavern BG
    showProgress: true
 ```
 
 
-> ## Begin
-> The party have seen a towering creature stomping at something on the other side of a wheat field, rushing into the wheat field they meet on the otherside the undead ape about to smash down a tree trunk its holding onto a wounded dwarf guard
+>  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-> ## Resolve
-> When the party defeats the enemyreload the guards will have dealt with the other goblins.
-one of the guards (Hester, female human, wearing ) will then thank the party and say if they wish to collect the ears they can hand them in for a reward with Harg (Willowbrook Head Guard)
+
+## Scene 2 - Combat
+```kenkufm-track
+   id: f664fc30-5392-47ce-ab67-d6f50fdc9b57
+   label: Battle Mix 4
+```
+
+
+> Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 
 

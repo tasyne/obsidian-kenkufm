@@ -3,20 +3,18 @@ This plugins give the ability to control Kenku FM from obsidian notes using the 
 
 ## Features
 
-### Basic Track Card
-![example of basic track card](https://github.com/natowb/obsidian-kenkufm/blob/main/assets/basic_track_card.png?raw=true)
+### Tracks
+![example of basic track card](https://github.com/natowb/obsidian-kenkufm/blob/main/media/example.png?raw=true)
 ````yaml
 ```kenkufm-track
    id: f664fc30-5392-47ce-ab67-d6f50fdc9b57
-```
-````
-
-### Progress Track Card
-![example of progress track card](https://github.com/natowb/obsidian-kenkufm/blob/main/assets/progress_track_card.png?raw=true)
-````yaml
-```kenkufm-track
-   id: f664fc30-5392-47ce-ab67-d6f50fdc9b57
+   label: Tavern BG
    showProgress: true
+```
+
+```kenkufm-track
+   id: f664fc30-5392-47ce-ab67-d6f50fdc9b57
+   label: Battle Mix 4
 ```
 ````
 

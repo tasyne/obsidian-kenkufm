@@ -12,6 +12,8 @@ export const trackProcessor = async (
 	el: HTMLElement,
 	ctx: MarkdownPostProcessorContext,
 ) => {
+	el.parentElement?.addClass("mt-2");
+
 	try {
 		const config: KenkuFmTrackYaml = parseYaml(source);
 		new KenkuTrackComponent({
