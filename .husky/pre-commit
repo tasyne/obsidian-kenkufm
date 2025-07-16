@@ -1,5 +1,6 @@
 BUN_INSTALL="$HOME/.bun"
 PATH="$BUN_INSTALL/bin:$PATH"
 
-bun run format
-bun run lint
+bun run biome:check
+bun run svelte:check
+bun run lint:ci
