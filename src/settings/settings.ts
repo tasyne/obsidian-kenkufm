@@ -33,11 +33,10 @@ export class KenkuSettingTab extends PluginSettingTab {
 					.setPlaceholder("http://127.0.0.1:3333")
 					.setValue(get(settings).hostname)
 					.onChange(async (value) => {
-						// This is where svelte stores get awkward. The docs claim get() should be avoided. Certainly get() in a context where a set is immediately used?
-						const s = get(settings);
-						s.hostname = value;
-						console.log(`hostname = ${s.hostname}`);
-						settings.set(s);
+						settings.update((s) => {
+							s.hostname = value;
+							return s;
+						});
 					}),
 			);
 	}
