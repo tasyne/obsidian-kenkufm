@@ -6,7 +6,8 @@ import type {
 	KenkuSoundboard,
 	KenkuTrack,
 } from "../types";
-const BASE_URL = "http://127.0.0.1:3333/v1";
+import { settings } from "../stores/kenkuStore";
+import { get } from "svelte/store";
 
 export type Result<T> = {
 	data: T | null;
@@ -33,14 +34,20 @@ export interface FetchSoundboardData {
 }
 
 export const fetchPlaylists = (): Promise<Result<FetchPlaylistData>> =>
-	withResult(() => requestUrl(`${BASE_URL}/playlist`).then((res) => res.json));
+	withResult(() =>
+		requestUrl(`${get(settings).hostname}/v1/playlist`).then((res) => res.json),
+	);
 
 export const fetchSoundboards = (): Promise<Result<FetchSoundboardData>> =>
 	withResult(() =>
-		requestUrl(`${BASE_URL}/soundboard`).then((res) => res.json),
+		requestUrl(`${get(settings).hostname}/v1/soundboard`).then(
+			(res) => res.json,
+		),
 	);
 
 export const fetchPlaybackState = (): Promise<Result<KenkuFMState>> =>
 	withResult(() =>
-		requestUrl(`${BASE_URL}/playlist/playback`).then((res) => res.json),
+		requestUrl(`${get(settings).hostname}/v1/playlist/playback`).then(
+			(res) => res.json,
+		),
 	);

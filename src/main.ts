@@ -3,25 +3,18 @@ import "virtual:uno.css";
 import { InsertTrackModal } from "./modals";
 import { registerCodeBlockProcessors } from "./processors";
 import * as kenkuConnector from "./kenku/kenkuConnector";
-import { isKenkuConnected } from "./stores/kenkuStore";
-
-interface ObsidianNoteConnectionsSettings {
-	mySetting: string;
-}
-
-const DEFAULT_SETTINGS: ObsidianNoteConnectionsSettings = {
-	mySetting: "default",
-};
+import { isKenkuConnected, settings } from "./stores/kenkuStore";
+import { DEFAULT_SETTINGS } from "./settings/settings";
+import { KenkuSettingTab } from "./settings/settings";
 
 export default class KenkuFMRemotePlugin extends Plugin {
-	settings!: ObsidianNoteConnectionsSettings;
-
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
+		const loadedData = await this.loadData();
+		if (loadedData) {
+			settings.set(loadedData);
+		} else {
+			settings.set(DEFAULT_SETTINGS);
+		}
 	}
 
 	async onload() {
@@ -36,6 +29,13 @@ export default class KenkuFMRemotePlugin extends Plugin {
 		});
 
 		await kenkuConnector.connect();
+
+		// subscribe to the settings store and save updates
+		settings.subscribe((settings) => {
+			this.saveData(settings);
+		});
+
+		this.addSettingTab(new KenkuSettingTab(this.app, this));
 
 		// this.registerView(VIEW_TYPE_EXAMPLE, (leaf) => new ExampleView(leaf));
 
