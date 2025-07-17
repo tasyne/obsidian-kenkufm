@@ -5,12 +5,16 @@ import { registerCodeBlockProcessors } from "./processors";
 import * as kenkuConnector from "./kenku/kenkuConnector";
 import { isKenkuConnected, settings } from "./stores/kenkuStore";
 import { DEFAULT_SETTINGS } from "./settings/settings";
-import type { ObsidianNoteConnectionsSettings } from "./settings/settings";
 import { KenkuSettingTab } from "./settings/settings";
 
 export default class KenkuFMRemotePlugin extends Plugin {
 	async loadSettings() {
-		settings.set(await this.loadData());
+		const loadedData = await this.loadData();
+		if (loadedData) {
+			settings.set(loadedData);
+		} else {
+			settings.set(DEFAULT_SETTINGS);
+		}
 	}
 
 	async onload() {
