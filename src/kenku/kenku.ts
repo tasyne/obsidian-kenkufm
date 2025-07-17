@@ -6,22 +6,26 @@ import {
 	sounds,
 	soundboards,
 	currentState,
+	settings,
 } from "../stores/kenkuStore";
+import { get } from "svelte/store";
 import type { KenkuItem, KenkuFMState } from "../types";
+import KenkuFMRemotePlugin from "../main";
+import { Plugin } from "obsidian";
 
 export async function initKenkuData() {
 	console.log("[Kenku] Loading Kenku FM Tracks...");
 
 	try {
 		const { tracks: t, playlists: p } = await requestUrl(
-			"http://127.0.0.1:3333/v1/playlist",
+			`${get(settings).hostname}/v1/playlist`,
 		).json;
 		tracks.set(t);
 		playlists.set(p);
 		console.log(`[Kenku] Loaded ${t.length} tracks`);
 
 		const { sounds: s, soundboards: sb } = await requestUrl(
-			"http://127.0.0.1:3333/v1/soundboard",
+			`${get(settings).hostname}/v1/soundboard`,
 		).json;
 		sounds.set(s);
 		soundboards.set(sb);
@@ -33,8 +37,9 @@ export async function initKenkuData() {
 
 export async function getKenkuState(): Promise<KenkuFMState> {
 	try {
-		const state = await requestUrl("http://127.0.0.1:3333/v1/playlist/playback")
-			.json;
+		const state = await requestUrl(
+			`${get(settings).hostname}/v1/playlist/playback`,
+		).json;
 		currentState.set(state);
 		return state as KenkuFMState;
 	} catch (e) {
@@ -46,7 +51,7 @@ export async function getKenkuState(): Promise<KenkuFMState> {
 export async function resumePlayback() {
 	try {
 		await requestUrl({
-			url: "http://127.0.0.1:3333/v1/playlist/playback/play",
+			url: `${get(settings).hostname}/v1/playlist/playback/play`,
 			method: "PUT",
 		});
 	} catch (e) {
@@ -58,7 +63,7 @@ export async function resumePlayback() {
 export async function pausePlayback() {
 	try {
 		await requestUrl({
-			url: "http://127.0.0.1:3333/v1/playlist/playback/pause",
+			url: `${get(settings).hostname}/v1/playlist/playback/pause`,
 			method: "PUT",
 		});
 	} catch (e) {
@@ -80,7 +85,7 @@ export async function playTrack(id: string, restart = false) {
 	}
 
 	await requestUrl({
-		url: "http://127.0.0.1:3333/v1/playlist/play",
+		url: `${get(settings).hostname}/v1/playlist/play`,
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ id }),
@@ -97,7 +102,7 @@ export async function seekTrack(id: string, to: number) {
 	const flooredTo = Math.min(Math.floor(to), track.duration);
 
 	await requestUrl({
-		url: "http://127.0.0.1:3333/v1/playlist/playback/seek",
+		url: `${get(settings).hostname}/v1/playlist/playback/seek`,
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ to: flooredTo }),
@@ -106,7 +111,7 @@ export async function seekTrack(id: string, to: number) {
 
 export async function playSound(id: string) {
 	await requestUrl({
-		url: "http://127.0.0.1:3333/v1/soundboard/play",
+		url: `${get(settings).hostname}/v1/soundboard/play`,
 		method: "PUT",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify({ id }),
